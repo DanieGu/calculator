@@ -82,15 +82,19 @@ Write-Host "Lid weighs $w and is $l long.";
 #dh is the hypotenuse of the triangle formed with y below d 
 $dh = [Math]::Sqrt([Math]::Pow($d, 2) + [Math]::Pow($y,2));
 
+$done = $false
 [Double]$angle = DtoR 0; #in radians  
-while($true)
+while(-not $done)
 {
     $angleDegrees = RtoD $angle;
 
     if($angleDegrees -gt 90)
     {
-        Write-Host "90 degrees reached";
-        break;
+        $angleDegrees = 90
+        $angle = DtoR $angleDegrees
+        
+        Write-Host "90 degrees reached"
+        $done = $true
     }
 
     #compute the angle below the horizontal where the lift is mounted
@@ -107,8 +111,14 @@ while($true)
     $liftExtension = [Math]::Sqrt([Math]::Pow($x, 2) + [Math]::Pow($dh, 2) -(2 * $x * $dh * [Math]::Cos($tAngle)));
     if($liftExtension -gt $liftExpanded)
     {
-        Write-Host "Max lift extension reached";
-        break;
+        $liftExtension = $liftExpanded
+        #recalculate the angle,  this would now be and sss triangle because we know all 3 sides
+        $tAngle = [Math]::Acos(([Math]::Pow($x, 2) + [Math]::Pow($dh, 2) - [Math]::Pow($liftExtension, 2)) / (2 * $x * $dh))
+        $angle = $tAngle - $dAngle
+        $angleDegrees = RtoD $angle
+
+        Write-Host "Max lift extension reached"
+        $done = $true
     }
 
     #find the small angle
